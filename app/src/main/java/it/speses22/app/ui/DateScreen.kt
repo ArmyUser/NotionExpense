@@ -75,7 +75,8 @@ fun DateStep(
         AnimatedContent(
             targetState = selectedDate,
             transitionSpec = {
-                fadeIn(tween(160)) togetherWith fadeOut(tween(120))
+                fadeIn(tween(SpeseMotion.ValueEnterMillis)) togetherWith
+                    fadeOut(tween(SpeseMotion.ValueExitMillis))
             },
             label = "selectedDate"
         ) { date ->
@@ -152,15 +153,22 @@ fun DateStep(
 @Composable
 private fun WeekDayHeader() {
 
-    val weekDays = listOf(
-        DayOfWeek.MONDAY,
-        DayOfWeek.TUESDAY,
-        DayOfWeek.WEDNESDAY,
-        DayOfWeek.THURSDAY,
-        DayOfWeek.FRIDAY,
-        DayOfWeek.SATURDAY,
-        DayOfWeek.SUNDAY
-    )
+    // getDisplayName consulta i dati di locale: si calcola una volta sola.
+    val weekDays = remember {
+        listOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY,
+            DayOfWeek.FRIDAY,
+            DayOfWeek.SATURDAY,
+            DayOfWeek.SUNDAY
+        ).map { day ->
+            day.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                .take(2)
+                .uppercase(Locale.getDefault())
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -168,7 +176,7 @@ private fun WeekDayHeader() {
             .height(32.dp)
     ) {
 
-        weekDays.forEach { day ->
+        weekDays.forEach { label ->
 
             Box(
                 modifier = Modifier
@@ -178,10 +186,7 @@ private fun WeekDayHeader() {
             ) {
 
                 Text(
-                    text = day
-                        .getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                        .take(2)
-                        .uppercase(Locale.getDefault()),
+                    text = label,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Spese.TextTertiary
@@ -203,7 +208,7 @@ private fun CalendarGrid(
     val daysInMonth = displayedMonth.lengthOfMonth()
 
     val rows = (firstDayOffset + daysInMonth + 6) / 7
-    val today = LocalDate.now()
+    val today = remember { LocalDate.now() }
 
     Column(modifier = Modifier.fillMaxWidth()) {
 

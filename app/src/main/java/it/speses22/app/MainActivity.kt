@@ -48,8 +48,10 @@ import it.speses22.app.ui.ExpenseStep
 import it.speses22.app.ui.theme.SpeseTheme
 import it.speses22.app.work.SubmitExpenseWorker
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import java.time.LocalDate
 
@@ -116,6 +118,15 @@ fun createNotificationChannel(context: Context) {
 }
 
 
+/** Risultato di una lettura di cache, applicato in un colpo solo sul main. */
+private data class CachedRefs(
+    val accounts: List<NotionRef>,
+    val categories: List<NotionRef>,
+    val accountId: String?,
+    val categoryId: String?
+)
+
+
 @Composable
 fun SpeseApp() {
 
@@ -136,9 +147,16 @@ fun SpeseApp() {
 
     var step by rememberSaveable { mutableStateOf(ExpenseStep.Amount) }
 
-    // Guida le animazioni di apertura e chiusura della card
-    var visible by remember { mutableStateOf(false) }
-    var submitted by remember { mutableStateOf(false) }
+    // Senza memoizzazione ogni ricomposizione crea una LocalDate nuova: essendo
+    // un tipo instabile, la sola identita' diversa impedirebbe di saltare
+    // ExpenseFlow ed Editor.
+    val date = remember(dateEpochDay) { LocalDate.ofEpochDay(dateEpochDay) }
+
+    // Guida le animazioni di apertura e chiusura della card.
+    // rememberSaveable: dopo una rotazione la card non rientra da capo e la
+    // conferma gia' mostrata non torna indietro all'editor.
+    var visible by rememberSaveable { mutableStateOf(false) }
+    var submitted by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         visible = true
@@ -148,27 +166,41 @@ fun SpeseApp() {
     // aggiornamento in background se Notion risponde.
     LaunchedEffect(Unit) {
 
-        accounts = RefStore.Accounts.read(context)
-        categories = RefStore.Categories.read(context)
+        // SharedPreferences fa I/O su disco al primo accesso: fuori dal main.
+        val cached = withContext(Dispatchers.IO) {
+            val cachedAccounts = RefStore.Accounts.read(context)
+            val cachedCategories = RefStore.Categories.read(context)
 
-        // Riprende l'ultima scelta, se quella riga esiste ancora.
-        selectedAccountId =
-            RefStore.Accounts.preselect(context, accounts, selectedAccountId)
-        selectedCategoryId =
-            RefStore.Categories.preselect(context, categories, selectedCategoryId)
+            // Riprende l'ultima scelta, se quella riga esiste ancora.
+            CachedRefs(
+                accounts = cachedAccounts,
+                categories = cachedCategories,
+                accountId = RefStore.Accounts
+                    .preselect(context, cachedAccounts, selectedAccountId),
+                categoryId = RefStore.Categories
+                    .preselect(context, cachedCategories, selectedCategoryId)
+            )
+        }
+
+        accounts = cached.accounts
+        categories = cached.categories
+        selectedAccountId = cached.accountId
+        selectedCategoryId = cached.categoryId
 
         RefSources.accounts().load()?.let { fresh ->
             accounts = fresh
-            RefStore.Accounts.write(context, fresh)
-            selectedAccountId =
+            selectedAccountId = withContext(Dispatchers.IO) {
+                RefStore.Accounts.write(context, fresh)
                 RefStore.Accounts.preselect(context, fresh, selectedAccountId)
+            }
         }
 
         RefSources.categories().load()?.let { fresh ->
             categories = fresh
-            RefStore.Categories.write(context, fresh)
-            selectedCategoryId =
+            selectedCategoryId = withContext(Dispatchers.IO) {
+                RefStore.Categories.write(context, fresh)
                 RefStore.Categories.preselect(context, fresh, selectedCategoryId)
+            }
         }
     }
 
@@ -205,12 +237,18 @@ fun SpeseApp() {
 
         // Nessuna notifica qui: "Expense added" e' l'accettazione locale, la
         // notifica arriva dal Worker solo quando Notion ha davvero salvato.
-        scope.launch {
-            delay(SpeseSuccessHoldMillis)
-            visible = false
-            delay(SpeseCloseDelayMillis)
-            (context as? ComponentActivity)?.finish()
-        }
+    }
+
+    // Tempi identici a prima, ma legati allo stato invece che allo scope della
+    // callback: una rotazione dopo l'invio non lascia la card aperta per sempre.
+    LaunchedEffect(submitted) {
+
+        if (!submitted) return@LaunchedEffect
+
+        delay(SpeseSuccessHoldMillis)
+        visible = false
+        delay(SpeseCloseDelayMillis)
+        (context as? ComponentActivity)?.finish()
     }
 
     // Indietro: torna al passo precedente, esce solo dal primo
@@ -236,7 +274,7 @@ fun SpeseApp() {
                     step = step,
                     amount = amount,
                     description = description,
-                    date = LocalDate.ofEpochDay(dateEpochDay),
+                    date = date,
                     categories = categories,
                     selectedCategoryId = selectedCategoryId,
                     accounts = accounts,

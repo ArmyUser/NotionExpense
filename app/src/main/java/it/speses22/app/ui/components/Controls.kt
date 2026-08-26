@@ -158,7 +158,8 @@ fun SpeseButton(
         AnimatedContent(
             targetState = text,
             transitionSpec = {
-                fadeIn(tween(140)) togetherWith fadeOut(tween(100))
+                fadeIn(tween(SpeseMotion.LabelEnterMillis)) togetherWith
+                    fadeOut(tween(SpeseMotion.LabelExitMillis))
             },
             label = "buttonLabel"
         ) { label ->

@@ -87,6 +87,24 @@ object SpeseMotion {
     /** Touch feedback. */
     const val PressMillis = 100
 
+    /**
+     * Scambio di fase della card (editor / selettore / conferma).
+     *
+     * Valori gia' in uso, spostati qui senza modificarli: cambiare i numeri
+     * cambierebbe il ritmo attuale.
+     */
+    const val PhaseEnterMillis = 220
+    const val PhaseEnterDelayMillis = 60
+    const val PhaseExitMillis = 140
+
+    /** Crossfade di un'etichetta dentro un controllo. */
+    const val LabelEnterMillis = 140
+    const val LabelExitMillis = 100
+
+    /** Crossfade di un valore letto (la data selezionata). */
+    const val ValueEnterMillis = 160
+    const val ValueExitMillis = 120
+
     /** Vertical travel of incoming/outgoing step content. */
     val StepOffset = 12.dp
 

@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -127,7 +128,9 @@ fun ExpenseFlow(
         else -> FlowPhase.Editor
     }
 
-    val scrimAlpha by animateFloatAsState(
+    // Nessun `by`: il valore si legge dentro drawBehind, cosi' un frame di
+    // animazione ridisegna soltanto, senza invalidare tutto ExpenseFlow.
+    val scrimAlpha = animateFloatAsState(
         targetValue = if (visible) Spese.ScrimAlpha else 0f,
         animationSpec = tween(
             durationMillis = if (visible) {
@@ -139,8 +142,9 @@ fun ExpenseFlow(
         label = "scrimAlpha"
     )
 
-    val slidePx = with(LocalDensity.current) {
-        SpeseMotion.StepOffset.roundToPx()
+    val density = LocalDensity.current
+    val slidePx = remember(density) {
+        with(density) { SpeseMotion.StepOffset.roundToPx() }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -149,7 +153,9 @@ fun ExpenseFlow(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Spese.Scrim.copy(alpha = scrimAlpha))
+                .drawBehind {
+                    drawRect(color = Spese.Scrim, alpha = scrimAlpha.value)
+                }
         )
 
         Column(
@@ -202,10 +208,14 @@ fun ExpenseFlow(
                         targetState = phase,
                         transitionSpec = {
                             (
-                                fadeIn(tween(220, delayMillis = 60)) +
-                                    scaleIn(initialScale = 0.94f)
+                                fadeIn(
+                                    tween(
+                                        durationMillis = SpeseMotion.PhaseEnterMillis,
+                                        delayMillis = SpeseMotion.PhaseEnterDelayMillis
+                                    )
+                                ) + scaleIn(initialScale = 0.94f)
                                 ).togetherWith(
-                                fadeOut(tween(140))
+                                fadeOut(tween(SpeseMotion.PhaseExitMillis))
                             ) using SizeTransform(clip = false) { _, _ ->
                                 SpeseMotion.ContainerSize
                             }
