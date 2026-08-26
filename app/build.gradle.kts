@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("androidx.baselineprofile")
 }
 
 /**
@@ -87,6 +88,26 @@ android {
         )
     }
 
+    buildTypes {
+
+        // Il profilo di baseline vale solo per build NON debuggable: per vederne
+        // l'effetto va installata una release, non la debug.
+        release {
+            isMinifyEnabled = false
+            // Firma di debug: serve solo per installare in locale una build
+            // non-debuggable. Non e' una configurazione di pubblicazione.
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        // Variante usata da Macrobenchmark: come release, ma profilabile.
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -96,10 +117,21 @@ android {
         jvmTarget = "17"
     }
 
+    // lintVital va in crash con la toolchain locale (AGP 8.6 + JDK del JBR):
+    // il controllo resta disponibile via ./gradlew :app:lint.
+    lint {
+        checkReleaseBuilds = false
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
     }
+}
+
+baselineProfile {
+    // Un unico profilo condiviso dalle varianti, invece di uno per variante.
+    mergeIntoMain = true
 }
 
 dependencies {
@@ -113,4 +145,10 @@ dependencies {
 
     // Invio in background che sopravvive alla chiusura dell'Activity.
     implementation("androidx.work:work-runtime-ktx:2.10.5")
+
+    // Installa il profilo di baseline al primo avvio.
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
+
+    // Sorgente del profilo generato dal modulo :baselineprofile.
+    baselineProfile(project(":baselineprofile"))
 }
