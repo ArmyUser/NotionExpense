@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# Notion integration — TEMPLATE. Contains no real values.
+#
+# Do NOT fill this file in and do NOT commit real values.
+# Copy these keys into your own ~/.gradle/gradle.properties, which lives
+# outside this repository and is therefore never committed.
+#
+#   open -e ~/.gradle/gradle.properties     (macOS)
+#
+# Every key is optional at build time: the project compiles with them absent,
+# and the app simply reports "Notion non configurato" instead of syncing.
+# ---------------------------------------------------------------------------
+
+# Internal integration token from https://www.notion.so/my-integrations
+# Grant it "Insert content" only, then share your Expenses database with it.
+notionToken=
+
+# Data source IDs (NOT database IDs). Retrieve with:
+#   curl -s -H "Authorization: Bearer $TOKEN" -H "Notion-Version: 2026-03-11" \
+#        https://api.notion.com/v1/databases/<your-database-id> \
+#     | python3 -c "import sys,json;[print(d['id'],d.get('name')) for d in json.load(sys.stdin)['data_sources']]"
+notionDataSourceId=
+notionCategoryDataSourceId=
+notionAccountsDataSourceId=
+
+# Property names, exactly as they appear in your own Expenses schema.
+# Inspect yours with:
+#   curl -s -H "Authorization: Bearer $TOKEN" -H "Notion-Version: 2026-03-11" \
+#        https://api.notion.com/v1/data_sources/<your-data-source-id> \
+#     | python3 -c "import sys,json;[print(k,v['type']) for k,v in json.load(sys.stdin)['properties'].items()]"
+notionPropTitle=
+notionPropAmount=
+notionPropDate=
+notionPropCategory=
+notionPropAccount=
+
+# One of: relation | select | multi_select | rich_text
+notionPropCategoryType=

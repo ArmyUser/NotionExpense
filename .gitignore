@@ -1,0 +1,40 @@
+# ---- Build output ----
+build/
+app/build/
+captures/
+externalNativeBuild/
+.externalNativeBuild/
+cmake-build-*/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ---- Gradle / Kotlin ----
+.gradle/
+.kotlin/
+local.properties
+
+# ---- IDE metadata ----
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ---- Secrets & signing ----
+# The real Notion token and IDs live in ~/.gradle/gradle.properties, outside
+# this repository. These patterns are belt-and-braces for local variants.
+secrets.properties
+keystore.properties
+signing.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# ---- OS / misc ----
+.DS_Store
+Thumbs.db
+*.log
