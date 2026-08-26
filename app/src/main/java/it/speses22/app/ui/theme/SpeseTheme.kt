@@ -61,6 +61,19 @@ object SpeseShapes {
  * Every duration and spring used in the flow lives here, so the motion stays
  * one system instead of drifting per screen.
  */
+/**
+ * Vincoli di dimensione del contenitore.
+ *
+ * Non toccano l'aspetto su un telefono normale: servono solo quando la
+ * finestra e' molto piu' larga o molto piu' bassa del previsto.
+ */
+object SpeseDimens {
+
+    /** Oltre questa larghezza la card resta centrata invece di allargarsi. */
+    val MaxCardWidth = 480.dp
+}
+
+
 object SpeseMotion {
 
     /** Step-to-step content swap. */

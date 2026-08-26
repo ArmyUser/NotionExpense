@@ -14,6 +14,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -54,6 +57,7 @@ import it.speses22.app.ui.components.SpeseButton
 import it.speses22.app.ui.components.SpeseButtonStyle
 import it.speses22.app.ui.components.StepDots
 import it.speses22.app.ui.theme.Spese
+import it.speses22.app.ui.theme.SpeseDimens
 import it.speses22.app.ui.theme.SpeseMotion
 import it.speses22.app.ui.theme.SpeseShapes
 import java.time.LocalDate
@@ -153,7 +157,8 @@ fun ExpenseFlow(
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars.union(WindowInsets.ime))
                 .padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.Bottom
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             AnimatedVisibility(
@@ -173,6 +178,9 @@ fun ExpenseFlow(
 
                 Column(
                     modifier = Modifier
+                        // L'ordine conta: widthIn deve limitare i vincoli prima
+                        // che fillMaxWidth li saturi, altrimenti non ha effetto.
+                        .widthIn(max = SpeseDimens.MaxCardWidth)
                         .fillMaxWidth()
                         .shadow(
                             elevation = 24.dp,
@@ -182,6 +190,11 @@ fun ExpenseFlow(
                         )
                         .clip(SpeseShapes.Card)
                         .background(Spese.Surface)
+                        // Ripiego per finestre basse: quando il contenuto non ci
+                        // sta si scorre, invece di finire fuori schermo. Su un
+                        // telefono in verticale non cambia nulla, perche' la
+                        // colonna continua ad avvolgere il contenuto.
+                        .verticalScroll(rememberScrollState())
                         .padding(horizontal = 20.dp, vertical = 20.dp)
                 ) {
 

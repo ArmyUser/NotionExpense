@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -126,7 +127,7 @@ private fun Keypad(
                         hapticFeedback = true,
                         modifier = Modifier
                             .weight(1f)
-                            .height(56.dp)
+                            .heightIn(min = 56.dp)
                     ) {
 
                         Box(contentAlignment = Alignment.Center) {

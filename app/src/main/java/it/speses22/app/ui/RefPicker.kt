@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.speses22.app.data.NotionRef
@@ -101,7 +102,7 @@ private fun RefRow(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(14.dp),
         container = container,
         containerPressed = Spese.SurfaceSunkenPressed,
@@ -135,7 +136,10 @@ private fun RefRow(
                 fontSize = 16.sp,
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                 color = Spese.TextPrimary,
-                maxLines = 1
+                // I nomi arrivano da Notion: possono essere lunghi a piacere.
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -176,7 +180,7 @@ fun RefSearchField(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .background(Spese.SurfaceSunken, SpeseShapes.Field)
                     .border(1.dp, Spese.Divider, SpeseShapes.Field)
                     .padding(horizontal = 14.dp),

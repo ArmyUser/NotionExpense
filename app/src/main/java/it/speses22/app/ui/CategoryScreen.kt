@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.speses22.app.data.NotionRef
@@ -183,7 +185,7 @@ private fun CategoryPickerButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp),
+            .heightIn(min = 64.dp),
         shape = SpeseShapes.Field,
         container = container,
         containerPressed = if (chosen) Spese.AccentSoft else Spese.SurfaceSunkenPressed
@@ -197,6 +199,7 @@ private fun CategoryPickerButton(
         ) {
 
             AnimatedContent(
+                modifier = Modifier.weight(1f, fill = false),
                 targetState = selectedCategoryName,
                 transitionSpec = {
                     fadeIn(tween(SpeseMotion.StepEnterMillis)) togetherWith
@@ -223,7 +226,9 @@ private fun CategoryPickerButton(
                             Spese.TextPrimary
                         } else {
                             Spese.TextSecondary
-                        }
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -267,7 +272,9 @@ private fun SummaryRow(
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             color = Spese.TextPrimary,
-            maxLines = 1
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
         )
 
         Spacer(modifier = Modifier.size(8.dp))
