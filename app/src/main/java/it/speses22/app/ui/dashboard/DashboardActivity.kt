@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
-import it.speses22.app.ui.theme.SpeseTheme
 
 /**
  * Punto di ingresso dell'icona del launcher.
@@ -21,9 +20,9 @@ class DashboardActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            SpeseTheme {
-                DashboardApp()
-            }
+            // Il tema della dashboard e' scelto dentro DashboardApp, cosi' la
+            // preferenza puo' cambiarlo a runtime. SpeseTheme resta al Quick Add.
+            DashboardApp()
         }
     }
 }
