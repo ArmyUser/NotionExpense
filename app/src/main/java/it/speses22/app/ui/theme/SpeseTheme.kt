@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
  */
 object Spese {
 
+    /** Fondo opaco della dashboard; il Quick Add resta su finestra traslucida. */
+    val Background = Color(0xFF141414)
+
     val Surface = Color(0xFF1F1F1F)
     val SurfaceSunken = Color(0xFF2A2A2A)
     val SurfaceSunkenPressed = Color(0xFF353535)

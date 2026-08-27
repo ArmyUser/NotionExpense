@@ -19,7 +19,8 @@ data class NotionConfig(
     val categoryType: String,
     val categoryDataSourceId: String,
     val accountProperty: String,
-    val accountsDataSourceId: String
+    val accountsDataSourceId: String,
+    val databaseId: String
 ) {
 
     val isConfigured: Boolean
@@ -37,7 +38,8 @@ data class NotionConfig(
             categoryType = BuildConfig.NOTION_PROP_CATEGORY_TYPE,
             categoryDataSourceId = BuildConfig.NOTION_CATEGORY_DATA_SOURCE_ID,
             accountProperty = BuildConfig.NOTION_PROP_ACCOUNT,
-            accountsDataSourceId = BuildConfig.NOTION_ACCOUNTS_DATA_SOURCE_ID
+            accountsDataSourceId = BuildConfig.NOTION_ACCOUNTS_DATA_SOURCE_ID,
+            databaseId = BuildConfig.NOTION_DATABASE_ID
         )
     }
 }

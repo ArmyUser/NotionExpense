@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="quick_add"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/quick_add_short_label"
+        android:shortcutLongLabel="@string/quick_add_long_label">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="it.speses22.app"
+            android:targetClass="it.speses22.app.MainActivity" />
+
+    </shortcut>
+
+</shortcuts>

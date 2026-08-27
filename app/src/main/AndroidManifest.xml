@@ -11,18 +11,39 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
 
+        <!-- Icona normale dell'app: apre la dashboard. -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.dashboard.DashboardActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.NotionExpense.Transparent">
+            android:theme="@style/Theme.NotionExpense.Dashboard">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
         </activity>
+
+        <!--
+            Quick Add: invariato, stesso nome di componente di prima
+            (it.speses22.app/.MainActivity).
+
+            Nessun intent-filter MAIN/LAUNCHER: non deve comparire una seconda
+            icona. Resta exported, quindi qualsiasi app di scorciatoie o
+            automazione puo' avviarlo esplicitamente per nome di componente.
+            Lo shortcut statico dichiarato su DashboardActivity offre lo stesso
+            bersaglio a chi sa selezionare gli shortcut invece dei componenti.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/quick_add_short_label"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.NotionExpense.Transparent" />
 
     </application>
 

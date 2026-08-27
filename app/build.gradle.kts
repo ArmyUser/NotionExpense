@@ -86,6 +86,13 @@ android {
             "NOTION_ACCOUNTS_DATA_SOURCE_ID",
             "\"${secret("notionAccountsDataSourceId")}\""
         )
+
+        // Solo per l'azione "Open in Notion".
+        buildConfigField(
+            "String",
+            "NOTION_DATABASE_ID",
+            "\"${secret("notionDatabaseId")}\""
+        )
     }
 
     buildTypes {
