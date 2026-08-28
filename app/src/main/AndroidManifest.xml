@@ -37,11 +37,19 @@
             automazione puo' avviarlo esplicitamente per nome di componente.
             Lo shortcut statico dichiarato su DashboardActivity offre lo stesso
             bersaglio a chi sa selezionare gli shortcut invece dei componenti.
+
+            taskAffinity distinta + singleTask: un avvio esterno porta con se'
+            FLAG_ACTIVITY_NEW_TASK, e con l'affinita' di default (quella del
+            package) il sistema trovava il task della dashboard e si limitava a
+            riportarlo in primo piano, mostrando la dashboard invece del Quick
+            Add. Con un task proprio la scorciatoia atterra sempre qui.
         -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/quick_add_short_label"
+            android:taskAffinity="it.speses22.app.quickadd"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.NotionExpense.Transparent" />
 
