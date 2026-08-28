@@ -33,6 +33,9 @@ class SubmitExpenseWorker(
             description = inputData.getString(KeyDescription).orEmpty(),
             date = inputData.getString(KeyDate).orEmpty(),
             category = inputData.getString(KeyCategory).orEmpty(),
+            // Senza questo la relazione Category resta vuota: il sink lo
+            // richiede non vuoto per costruire il payload della relation.
+            categoryPageId = inputData.getString(KeyCategoryPageId).orEmpty(),
             accountPageId = inputData.getString(KeyAccountPageId).orEmpty()
         )
 
@@ -76,6 +79,7 @@ class SubmitExpenseWorker(
         private const val KeyDescription = "description"
         private const val KeyDate = "date"
         private const val KeyCategory = "category"
+        private const val KeyCategoryPageId = "categoryPageId"
         private const val KeyAccountPageId = "accountPageId"
 
         /** Leggibile da WorkManager per capire perche' un invio e' fallito. */
@@ -103,6 +107,7 @@ class SubmitExpenseWorker(
                         KeyDescription to expense.description,
                         KeyDate to expense.date,
                         KeyCategory to expense.category,
+                        KeyCategoryPageId to expense.categoryPageId,
                         KeyAccountPageId to expense.accountPageId
                     )
                 )
