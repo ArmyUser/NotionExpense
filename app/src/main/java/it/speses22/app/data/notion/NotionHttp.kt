@@ -2,6 +2,7 @@ package it.speses22.app.data.notion
 
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.ProtocolException
 import java.net.URL
 
 internal data class NotionResponse(val code: Int, val body: String) {
@@ -26,7 +27,27 @@ internal object NotionHttp {
 
     private const val TimeoutMillis = 15_000
 
-    fun post(token: String, url: String, json: String): NotionResponse {
+    fun post(token: String, url: String, json: String): NotionResponse =
+        send("POST", token, url, json)
+
+    /**
+     * PATCH: serve solo a spostare una pagina nel cestino.
+     *
+     * HttpURLConnection su Android accetta PATCH (l'implementazione e' quella di
+     * OkHttp), mentre la JVM desktop no: se mai venisse rifiutato si ricade
+     * sull'header di override, che e' l'unica alternativa senza aggiungere una
+     * libreria HTTP al progetto.
+     */
+    fun patch(token: String, url: String, json: String): NotionResponse =
+        send("PATCH", token, url, json)
+
+
+    private fun send(
+        method: String,
+        token: String,
+        url: String,
+        json: String
+    ): NotionResponse {
 
         val payload = json.toByteArray(Charsets.UTF_8)
 
@@ -35,7 +56,16 @@ internal object NotionHttp {
         try {
 
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
+
+                var override: String? = null
+
+                try {
+                    requestMethod = method
+                } catch (_: ProtocolException) {
+                    requestMethod = "POST"
+                    override = method
+                }
+
                 connectTimeout = TimeoutMillis
                 readTimeout = TimeoutMillis
                 doOutput = true
@@ -43,6 +73,8 @@ internal object NotionHttp {
                 setRequestProperty("Authorization", "Bearer $token")
                 setRequestProperty("Notion-Version", Version)
                 setRequestProperty("Content-Type", "application/json; charset=utf-8")
+
+                override?.let { setRequestProperty("X-HTTP-Method-Override", it) }
             }
 
             connection.outputStream.use { it.write(payload) }

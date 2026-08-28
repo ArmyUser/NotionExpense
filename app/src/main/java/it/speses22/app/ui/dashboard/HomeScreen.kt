@@ -1,11 +1,10 @@
 package it.speses22.app.ui.dashboard
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,11 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,38 +24,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.speses22.app.data.ExpenseRecord
+import java.time.LocalDate
+import java.time.YearMonth
 
-private enum class Grouping(val label: String) {
-    Categories("Categories"),
-    Accounts("Accounts")
-}
-
-/** Un gruppo esplorabile: categoria o conto, con le sue spese. */
-private data class Group(
-    val name: String,
-    val total: Double,
-    val fraction: Float,
-    val items: List<ExpenseRecord>
-)
-
+/**
+ * Home: solo numeri e grafici del mese scelto.
+ *
+ * L'elenco delle singole spese vive in Expenses, dove ci sono i filtri: qui
+ * ripeterlo voleva dire avere due storici leggermente diversi.
+ */
 @Composable
-fun HomeScreen(data: PeriodData) {
+fun HomeScreen(data: PeriodData, month: YearMonth) {
 
-    val colors = MaterialTheme.colorScheme
     val total = data.expenses.sumOf { it.amount }
-
-    var grouping by rememberSaveable { mutableStateOf(Grouping.Categories) }
-    var expanded by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        // ---- Totale e budget ----
-        Surface {
+        Card {
 
             Text(
                 text = "Total spent",
                 fontSize = 13.sp,
-                color = colors.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -70,7 +54,7 @@ fun HomeScreen(data: PeriodData) {
                 text = money(total),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = colors.onSurface
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             data.budget?.let { budget ->
@@ -80,8 +64,8 @@ fun HomeScreen(data: PeriodData) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Figure("Budget", money(budget), Modifier.weight(1f))
                     Figure(
-                        label = "Remaining",
-                        value = money(budget - total),
+                        label = if (budget - total < 0) "Over budget" else "Remaining",
+                        value = money(kotlin.math.abs(budget - total)),
                         modifier = Modifier.weight(1f),
                         highlight = budget - total < 0
                     )
@@ -110,12 +94,55 @@ fun HomeScreen(data: PeriodData) {
             return@Column
         }
 
-        // ---- Ripartizione per categoria ----
-        val categorySlices = slices(data.expenses) { it.categoryName }
+        // ---- Numeri secchi -------------------------------------------------
 
-        Surface {
+        val amounts = data.expenses.map { it.amount }
+        val elapsed = daysElapsed(month)
 
-            SectionTitle("EXPENSE BY CATEGORY")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Stat("Expenses", "${data.expenses.size}", Modifier.weight(1f))
+            Stat("Average", money(total / data.expenses.size), Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Stat("Largest", money(amounts.max()), Modifier.weight(1f))
+            Stat(
+                label = "Per day",
+                value = money(if (elapsed > 0) total / elapsed else 0.0),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // ---- Andamento giornaliero ----------------------------------------
+
+        Card {
+
+            SectionTitle("DAILY SPENDING")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            DailyBars(month = month, expenses = data.expenses)
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // ---- Ripartizione per categoria -----------------------------------
+
+        val categorySlices = slices(data.expenses) { it.categoryName ?: "Uncategorised" }
+
+        Card {
+
+            SectionTitle("BY CATEGORY")
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -125,49 +152,28 @@ fun HomeScreen(data: PeriodData) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            categorySlices.forEach { slice ->
+            categorySlices.forEachIndexed { index, slice ->
+                if (index > 0) Spacer(modifier = Modifier.height(10.dp))
                 LegendRow(slice)
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // ---- Esplorazione per categoria o conto ----
-        SectionTitle("EXPENSES")
+        // ---- Ripartizione per conto ---------------------------------------
 
-        Spacer(modifier = Modifier.height(8.dp))
+        val accountSlices = slices(data.expenses) { it.accountName ?: "No account" }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Grouping.entries.forEach { entry ->
-                Toggle(
-                    label = entry.label,
-                    selected = entry == grouping,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        grouping = entry
-                        expanded = null
-                    }
-                )
+        Card {
+
+            SectionTitle("BY ACCOUNT")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            accountSlices.forEachIndexed { index, slice ->
+                if (index > 0) Spacer(modifier = Modifier.height(14.dp))
+                MeterRow(slice)
             }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        val groups = groups(data.expenses, grouping)
-
-        groups.forEach { group ->
-
-            GroupRow(
-                group = group,
-                expanded = expanded == group.name,
-                onClick = { expanded = if (expanded == group.name) null else group.name }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -175,16 +181,28 @@ fun HomeScreen(data: PeriodData) {
 
 // ---- Aggregazioni ------------------------------------------------------
 
+/** Giorni gia' trascorsi: per il mese in corso la media si ferma a oggi. */
+private fun daysElapsed(month: YearMonth): Int {
+
+    val today = LocalDate.now()
+
+    return when {
+        YearMonth.from(today) == month -> today.dayOfMonth
+        month.isAfter(YearMonth.from(today)) -> 0
+        else -> month.lengthOfMonth()
+    }
+}
+
 private fun slices(
     expenses: List<ExpenseRecord>,
-    key: (ExpenseRecord) -> String?
+    key: (ExpenseRecord) -> String
 ): List<Slice> {
 
     val total = expenses.sumOf { it.amount }
     if (total <= 0.0) return emptyList()
 
     return expenses
-        .groupBy { key(it) ?: "Uncategorised" }
+        .groupBy(key)
         .map { (name, rows) -> name to rows.sumOf { it.amount } }
         .sortedByDescending { it.second }
         .mapIndexed { index, (name, amount) ->
@@ -197,34 +215,11 @@ private fun slices(
         }
 }
 
-private fun groups(expenses: List<ExpenseRecord>, grouping: Grouping): List<Group> {
-
-    val total = expenses.sumOf { it.amount }
-
-    return expenses
-        .groupBy {
-            when (grouping) {
-                Grouping.Categories -> it.categoryName ?: "Uncategorised"
-                Grouping.Accounts -> it.accountName ?: "No account"
-            }
-        }
-        .map { (name, rows) ->
-            val sum = rows.sumOf { it.amount }
-            Group(
-                name = name,
-                total = sum,
-                fraction = if (total > 0) (sum / total).toFloat() else 0f,
-                items = rows.sortedByDescending { it.date }
-            )
-        }
-        .sortedByDescending { it.total }
-}
-
 
 // ---- Pezzi di UI -------------------------------------------------------
 
 @Composable
-private fun Surface(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+private fun Card(content: @Composable ColumnScope.() -> Unit) {
 
     Column(
         modifier = Modifier
@@ -245,6 +240,34 @@ private fun SectionTitle(text: String) {
         letterSpacing = 1.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
+}
+
+/** Riquadro con un solo numero: quattro di questi formano la griglia. */
+@Composable
+private fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
+
+    val colors = MaterialTheme.colorScheme
+
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(colors.surface)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+
+        Text(text = label, fontSize = 11.sp, color = colors.onSurfaceVariant)
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = value,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
@@ -334,51 +357,17 @@ private fun LegendRow(slice: Slice) {
 }
 
 @Composable
-private fun Toggle(
-    label: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val colors = MaterialTheme.colorScheme
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) colors.primaryContainer else colors.surfaceVariant)
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun GroupRow(group: Group, expanded: Boolean, onClick: () -> Unit) {
+private fun MeterRow(slice: Slice) {
 
     val colors = MaterialTheme.colorScheme
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(colors.surface)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
 
             Text(
-                text = group.name,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
+                text = slice.label,
+                fontSize = 14.sp,
                 color = colors.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -386,60 +375,16 @@ private fun GroupRow(group: Group, expanded: Boolean, onClick: () -> Unit) {
             )
 
             Text(
-                text = money(group.total),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
+                text = money(slice.amount),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
                 color = colors.onSurface
             )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(
-                text = if (expanded) "▾" else "▸",
-                fontSize = 13.sp,
-                color = colors.onSurfaceVariant
-            )
         }
 
-        AnimatedVisibility(visible = expanded) {
+        Spacer(modifier = Modifier.height(7.dp))
 
-            Column(modifier = Modifier.padding(top = 10.dp)) {
-
-                group.items.forEach { item ->
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 5.dp)
-                    ) {
-
-                        Text(
-                            text = money(item.amount),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.size(12.dp))
-
-                        Text(
-                            text = item.description.ifBlank { "—" },
-                            fontSize = 13.sp,
-                            color = colors.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        Text(
-                            text = shortDate(item.date),
-                            fontSize = 12.sp,
-                            color = colors.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
+        MeterBar(fraction = slice.fraction, color = slice.color)
     }
 }
 

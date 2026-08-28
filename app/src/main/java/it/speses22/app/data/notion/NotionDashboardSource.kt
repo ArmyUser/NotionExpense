@@ -124,6 +124,26 @@ class NotionDashboardSource(
     }
 
 
+    override suspend fun delete(id: String): Boolean = withContext(Dispatchers.IO) {
+
+        if (!config.isConfigured || id.isBlank()) return@withContext false
+
+        try {
+
+            // "in_trash" e' la stessa azione del cestino di Notion: la pagina
+            // sparisce dalle query ma resta recuperabile per 30 giorni.
+            NotionHttp.patch(
+                token = config.token,
+                url = "${NotionHttp.PagesUrl}/$id",
+                json = JSONObject().put("in_trash", true).toString()
+            ).isSuccess
+
+        } catch (_: IOException) {
+            false
+        }
+    }
+
+
     private fun dateBound(operator: String, day: LocalDate): JSONObject =
         JSONObject()
             .put("property", config.dateProperty)

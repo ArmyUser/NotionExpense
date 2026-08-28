@@ -7,7 +7,6 @@ import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -36,7 +35,6 @@ import it.speses22.app.data.notion.NotionConfig
 
 @Composable
 fun SettingsScreen(
-    data: PeriodData,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit
 ) {
@@ -50,21 +48,17 @@ fun SettingsScreen(
 
             Line("Connection", if (config.isConfigured) "Configured" else "Not configured")
 
-            Line(
-                label = "Database",
-                value = config.dataSourceId.takeIf { it.isNotBlank() }
-                    ?.let { "Expenses · …${it.takeLast(6)}" }
-                    ?: "—"
-            )
+            if (!config.isConfigured) {
 
-            Line(
-                label = "Last read",
-                value = when {
-                    data.loading -> "Reading…"
-                    data.failed -> "Failed"
-                    else -> "${data.expenses.size} expenses"
-                }
-            )
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Le credenziali sono un valore di build, non un campo dell'app:
+                // dirlo qui evita di cercare un'impostazione che non esiste.
+                Body(
+                    "The Notion token and data source IDs are build settings. " +
+                        "Add them to gradle.properties and rebuild the app."
+                )
+            }
 
             Action(
                 label = "Open in Notion",
@@ -85,16 +79,6 @@ fun SettingsScreen(
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Non e' leggibile dall'app: RegiStar e le scorciatoie di sistema
-            // vivono fuori da Notion Expense.
-            Line("Current shortcut", "Managed externally")
-
-            Line("Target activity", "MainActivity")
-
-            Line("Published shortcut", "Quick Add")
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -135,18 +119,6 @@ fun SettingsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Card {
-            Heading("Other automation apps")
-
-            Body(
-                "Any shortcut or automation app can launch Quick Add by targeting the " +
-                    "published “Quick Add” shortcut, or the activity directly:\n\n" +
-                    "it.speses22.app/.MainActivity"
-            )
-        }
-
         Spacer(modifier = Modifier.height(18.dp))
 
         Group("APPEARANCE") {
@@ -175,10 +147,6 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         Group("GENERAL") {
-
-            // Il simbolo e' fisso nel codice del Quick Add: renderlo modificabile
-            // qui creerebbe due valute in disaccordo.
-            Line("Currency", "EUR (€)")
 
             Action(
                 label = "Notification settings",

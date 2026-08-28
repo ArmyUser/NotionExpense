@@ -52,6 +52,7 @@ import it.speses22.app.data.DashboardSources
 import it.speses22.app.data.ExpenseRecord
 import it.speses22.app.data.ThemeMode
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 
 enum class Destination(val label: String, val icon: ImageVector) {
     Home("Home", Icons.Filled.Home),
@@ -82,6 +83,12 @@ fun DashboardApp() {
         var destination by rememberSaveable { mutableStateOf(Destination.Home) }
         var monthOffset by rememberSaveable { mutableStateOf(0) }
         var data by remember { mutableStateOf(PeriodData()) }
+
+        val scroll = rememberScrollState()
+
+        // Ogni scheda riparte dall'alto: lo scorrimento e' condiviso, e
+        // arrivare su Expenses a meta' elenco sembrava un salto.
+        LaunchedEffect(destination) { scroll.scrollTo(0) }
 
         // Il mese e' scelto su Home e vale anche per lo storico.
         val month = remember(monthOffset) {
@@ -136,7 +143,7 @@ fun DashboardApp() {
                         .widthIn(max = MaxContentWidth)
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scroll)
                         .padding(horizontal = 18.dp)
                 ) {
 
@@ -151,13 +158,28 @@ fun DashboardApp() {
                                 onNext = { monthOffset += 1 }
                             )
                             Spacer(modifier = Modifier.height(14.dp))
-                            HomeScreen(data = data)
+                            HomeScreen(data = data, month = month)
                         }
 
                         Destination.Expenses -> {
                             ScreenTitle("Expenses", monthLabel(month))
                             Spacer(modifier = Modifier.height(14.dp))
-                            ExpensesScreen(data = data)
+                            ExpensesScreen(
+                                data = data,
+                                month = month,
+                                onMonthChange = { chosen ->
+                                    monthOffset = ChronoUnit.MONTHS
+                                        .between(YearMonth.now(), chosen)
+                                        .toInt()
+                                },
+                                onDeleted = { id ->
+                                    // Notion ha gia' confermato: si toglie la riga
+                                    // invece di rileggere tutto il mese.
+                                    data = data.copy(
+                                        expenses = data.expenses.filterNot { it.id == id }
+                                    )
+                                }
+                            )
                         }
 
                         Destination.Settings -> {
@@ -165,7 +187,6 @@ fun DashboardApp() {
                             ScreenTitle("Settings", null)
                             Spacer(modifier = Modifier.height(14.dp))
                             SettingsScreen(
-                                data = data,
                                 themeMode = themeMode,
                                 onThemeChange = { chosen ->
                                     themeMode = chosen
