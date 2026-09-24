@@ -15,6 +15,7 @@
   <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white">
   <img alt="Notion API" src="https://img.shields.io/badge/Notion%20API-2026--03--11-000000?logo=notion&logoColor=white">
   <img alt="Free and open source" src="https://img.shields.io/badge/Free%20%26%20Open%20Source-%E2%9C%93-brightgreen">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-blue"></a>
 </p>
 
 <p align="center">
@@ -383,4 +384,5 @@ If you find it useful, please ⭐ **star the repository**. It really helps!
 
 ## 📄 License
 
-Not currently licensed for redistribution.
+Released under the [MIT License](LICENSE). You're free to use, modify and share
+it, including in your own projects, as long as you keep the copyright notice.
