@@ -322,26 +322,6 @@ the phone**, like Back Tap on the iPhone.
 | ➕ From the Dashboard | Tap the **+** button on Home or Expenses |
 | 🤖 Automation apps | Launch the activity `it.speses22.app/.MainActivity` or the **Quick Add** shortcut |
 
-## 🩺 Troubleshooting
-
-| Problem | Likely cause and fix |
-|---|---|
-| **Settings shows "Not configured"** | The token or `notionDataSourceId` is missing. Check `~/.gradle/gradle.properties` and **rebuild** |
-| **"Could not read from Notion"** | No connection, or the integration isn't connected to the table (step 3) |
-| **Error `404 object_not_found`** | The table isn't shared with the integration, or you used a **database ID** where a **data source ID** belongs |
-| **Empty Account or Category list** | Wrong `notionAccountsDataSourceId` / `notionCategoryDataSourceId`, or those tables aren't connected |
-| **Budget doesn't appear on Home** | The Categories table has no `Monthly Budget` column (the name must match exactly) |
-| **Can't delete an expense** | The integration doesn't have **Update content** (step 2) |
-| **No sync notification** | Allow notifications in **Settings → Notification settings** inside the app |
-| **Double tap opens the Dashboard** | RegiStar is set to *Open app*. Pick the **Quick Add** shortcut instead |
-| **Double tap isn't detected** | Check that Back-Tap is on in RegiStar. A very thick case can get in the way |
-
-### Known limitations
-
-- The Dashboard reads up to **100 expenses per month**, and the pickers show up
-  to **100 accounts** and **100 categories**.
-- The currency is **euro (€)**.
-
 ## 🔒 Security
 
 This repository contains **no tokens, credentials or workspace IDs**.
