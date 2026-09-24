@@ -5,17 +5,10 @@ plugins {
     id("androidx.baselineprofile")
 }
 
-/**
- * Segreti e schema Notion.
- *
- * I valori vivono in ~/.gradle/gradle.properties, fuori dal repository: così il
- * token non puo' finire in Git nemmeno per sbaglio. Il fallback vuoto tiene il
- * progetto compilabile anche senza configurazione.
- */
+
 fun secret(name: String): String =
     (project.findProperty(name) as String?).orEmpty().trim()
 
-/** Nome della proprieta' Notion, con un default ragionevole se non configurato. */
 fun schema(name: String, fallback: String): String =
     (project.findProperty(name) as String?)
         ?.trim()
@@ -33,7 +26,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // --- Credenziali Notion ---
         buildConfigField("String", "NOTION_TOKEN", "\"${secret("notionToken")}\"")
         buildConfigField(
             "String",
@@ -41,7 +33,6 @@ android {
             "\"${secret("notionDataSourceId")}\""
         )
 
-        // --- Mappatura sullo schema del database esistente ---
         buildConfigField(
             "String",
             "NOTION_PROP_TITLE",
@@ -97,16 +88,11 @@ android {
 
     buildTypes {
 
-        // Il profilo di baseline vale solo per build NON debuggable: per vederne
-        // l'effetto va installata una release, non la debug.
         release {
             isMinifyEnabled = false
-            // Firma di debug: serve solo per installare in locale una build
-            // non-debuggable. Non e' una configurazione di pubblicazione.
             signingConfig = signingConfigs.getByName("debug")
         }
 
-        // Variante usata da Macrobenchmark: come release, ma profilabile.
         create("benchmark") {
             initWith(getByName("release"))
             signingConfig = signingConfigs.getByName("debug")
@@ -124,8 +110,6 @@ android {
         jvmTarget = "17"
     }
 
-    // lintVital va in crash con la toolchain locale (AGP 8.6 + JDK del JBR):
-    // il controllo resta disponibile via ./gradlew :app:lint.
     lint {
         checkReleaseBuilds = false
     }
@@ -137,7 +121,6 @@ android {
 }
 
 baselineProfile {
-    // Un unico profilo condiviso dalle varianti, invece di uno per variante.
     mergeIntoMain = true
 }
 
@@ -150,12 +133,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
-    // Invio in background che sopravvive alla chiusura dell'Activity.
     implementation("androidx.work:work-runtime-ktx:2.10.5")
 
-    // Installa il profilo di baseline al primo avvio.
     implementation("androidx.profileinstaller:profileinstaller:1.4.1")
 
-    // Sorgente del profilo generato dal modulo :baselineprofile.
     baselineProfile(project(":baselineprofile"))
 }
