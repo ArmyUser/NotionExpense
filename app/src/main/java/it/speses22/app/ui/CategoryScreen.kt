@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.NotionRef
 import it.speses22.app.ui.components.SpeseButton
 import it.speses22.app.ui.components.SpeseButtonStyle
@@ -82,7 +83,7 @@ fun CategoryStep(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SummaryRow(label = "Amount", value = "€ $amount", onClick = onEditAmount)
+        SummaryRow(label = "Amount", value = "${AppCurrency.symbol} $amount", onClick = onEditAmount)
 
         SummaryRow(
             label = "Description",

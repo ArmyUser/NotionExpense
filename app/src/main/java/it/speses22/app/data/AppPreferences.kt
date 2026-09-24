@@ -8,15 +8,16 @@ import android.content.Context
 enum class ThemeMode { Light, Dark }
 
 /**
- * Preferenze locali condivise.
+ * Preferenze locali condivise da dashboard e Quick Add.
  *
- * Un solo valore persistito: non esistono preferenze separate per dashboard e
- * Quick Add.
+ * Il tema e' una scelta dell'utente; la valuta no, e' solo la copia locale di
+ * quella letta da Notion (vedi [AppCurrency]).
  */
 object AppPreferences {
 
     private const val Prefs = "app_preferences"
     private const val KeyTheme = "theme_mode"
+    private const val KeyCurrency = "currency_symbol"
 
     /** Default scuro: e' l'aspetto con cui l'app e' stata usata finora. */
     private val Default = ThemeMode.Dark
@@ -31,6 +32,14 @@ object AppPreferences {
 
     fun setThemeMode(context: Context, mode: ThemeMode) {
         prefs(context).edit().putString(KeyTheme, mode.name).apply()
+    }
+
+    /** Ultimo simbolo letto da Notion, oppure null se non e' mai stato letto. */
+    fun currencySymbol(context: Context): String? =
+        prefs(context).getString(KeyCurrency, null)
+
+    fun setCurrencySymbol(context: Context, symbol: String) {
+        prefs(context).edit().putString(KeyCurrency, symbol).apply()
     }
 
     private fun prefs(context: Context) =

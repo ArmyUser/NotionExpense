@@ -41,15 +41,21 @@ internal object NotionHttp {
     fun patch(token: String, url: String, json: String): NotionResponse =
         send("PATCH", token, url, json)
 
+    /** GET senza corpo: serve a leggere lo schema di una tabella. */
+    fun get(token: String, url: String): NotionResponse =
+        send("GET", token, url, null)
+
 
     private fun send(
         method: String,
         token: String,
         url: String,
-        json: String
+        json: String?
     ): NotionResponse {
 
-        val payload = json.toByteArray(Charsets.UTF_8)
+        // Senza corpo niente doOutput: con doOutput attivo HttpURLConnection
+        // trasforma una GET in POST.
+        val payload = json?.toByteArray(Charsets.UTF_8)
 
         var connection: HttpURLConnection? = null
 
@@ -68,16 +74,19 @@ internal object NotionHttp {
 
                 connectTimeout = TimeoutMillis
                 readTimeout = TimeoutMillis
-                doOutput = true
-                setFixedLengthStreamingMode(payload.size)
                 setRequestProperty("Authorization", "Bearer $token")
                 setRequestProperty("Notion-Version", Version)
-                setRequestProperty("Content-Type", "application/json; charset=utf-8")
+
+                if (payload != null) {
+                    doOutput = true
+                    setFixedLengthStreamingMode(payload.size)
+                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                }
 
                 override?.let { setRequestProperty("X-HTTP-Method-Override", it) }
             }
 
-            connection.outputStream.use { it.write(payload) }
+            payload?.let { bytes -> connection.outputStream.use { it.write(bytes) } }
 
             val code = connection.responseCode
 

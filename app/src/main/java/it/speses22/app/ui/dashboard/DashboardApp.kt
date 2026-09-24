@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.speses22.app.MainActivity
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.AppPreferences
 import it.speses22.app.data.DashboardSources
 import it.speses22.app.data.ExpenseRecord
@@ -94,6 +95,9 @@ fun DashboardApp() {
         val month = remember(monthOffset) {
             YearMonth.now().plusMonths(monthOffset.toLong())
         }
+
+        // Una volta per apertura: la valuta non cambia col mese.
+        LaunchedEffect(Unit) { AppCurrency.refresh(context) }
 
         LaunchedEffect(month) {
 

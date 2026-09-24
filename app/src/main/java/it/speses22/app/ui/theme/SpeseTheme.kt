@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.AppPreferences
 import it.speses22.app.data.ThemeMode
 
@@ -252,6 +253,9 @@ fun SpeseTheme(content: @Composable () -> Unit) {
 
     val context = LocalContext.current
     val dark = AppPreferences.themeMode(context) == ThemeMode.Dark
+
+    // Stesso file di preferenze del tema, gia' letto qui sopra: nessun I/O in piu'.
+    AppCurrency.load(context)
 
     // Applicata prima che i figli si compongano.
     remember(dark) {

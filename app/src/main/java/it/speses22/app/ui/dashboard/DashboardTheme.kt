@@ -7,8 +7,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.ThemeMode
 
 /**
@@ -69,6 +71,8 @@ fun DashboardTheme(
     val dark = mode == ThemeMode.Dark
 
     val view = LocalView.current
+
+    AppCurrency.load(LocalContext.current)
 
     if (!view.isInEditMode) {
         SideEffect {

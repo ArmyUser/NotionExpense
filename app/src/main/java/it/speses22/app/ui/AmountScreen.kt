@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.ui.components.SpeseSurfaceButton
 import it.speses22.app.ui.theme.Spese
 
@@ -66,7 +67,7 @@ private fun AmountDisplay(amount: String) {
     ) {
 
         Text(
-            text = "€",
+            text = AppCurrency.symbol,
             fontSize = 26.sp,
             fontWeight = FontWeight.Medium,
             color = if (untouched) Spese.TextTertiary else Spese.TextSecondary,

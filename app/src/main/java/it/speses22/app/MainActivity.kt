@@ -36,6 +36,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.WindowCompat
 
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.Expense
 import it.speses22.app.data.NotionRef
 import it.speses22.app.data.RefSources
@@ -202,6 +203,10 @@ fun SpeseApp() {
                 RefStore.Categories.preselect(context, fresh, selectedCategoryId)
             }
         }
+
+        // Dopo le liste: il simbolo gia' in cache e' mostrato subito, questo
+        // lo corregge solo se in Notion il formato della colonna e' cambiato.
+        AppCurrency.refresh(context)
     }
 
     // Chiude il flusso lasciando finire l'animazione di uscita

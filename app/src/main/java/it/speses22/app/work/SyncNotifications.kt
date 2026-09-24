@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.Expense
 import kotlin.math.abs
 
@@ -28,7 +29,7 @@ internal object SyncNotifications {
             context = context,
             expense = expense,
             title = "Expense synced",
-            text = "€ ${expense.amount} · ${expense.description} saved to Notion."
+            text = "${AppCurrency.symbol(context)} ${expense.amount} · ${expense.description} saved to Notion."
         )
     }
 
@@ -39,7 +40,7 @@ internal object SyncNotifications {
             context = context,
             expense = expense,
             title = "Expense not synced",
-            text = "€ ${expense.amount} · ${expense.description} could not be saved. $reason"
+            text = "${AppCurrency.symbol(context)} ${expense.amount} · ${expense.description} could not be saved. $reason"
         )
     }
 

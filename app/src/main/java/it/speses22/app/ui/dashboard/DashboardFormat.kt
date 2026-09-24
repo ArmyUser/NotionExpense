@@ -1,5 +1,6 @@
 package it.speses22.app.ui.dashboard
 
+import it.speses22.app.data.AppCurrency
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -24,8 +25,9 @@ fun monthLabel(month: YearMonth): String {
     return "$name ${month.year}"
 }
 
-/** Il simbolo resta quello del Quick Add; solo i separatori seguono il telefono. */
-fun money(value: Double): String = "€ %,.2f".format(Locale.getDefault(), value)
+/** Simbolo letto da Notion, come nel Quick Add; i separatori seguono il telefono. */
+fun money(value: Double): String =
+    "${AppCurrency.symbol} %,.2f".format(Locale.getDefault(), value)
 
 fun shortDate(date: LocalDate): String = date.format(DayMonth)
 

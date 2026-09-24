@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.speses22.app.data.AppCurrency
 import it.speses22.app.data.NotionRef
 import it.speses22.app.data.isAmountValid
 import it.speses22.app.ui.components.SpeseButton
@@ -525,7 +526,7 @@ private fun SuccessContent(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "€ $amount · ${category ?: ""}",
+            text = "${AppCurrency.symbol} $amount · ${category ?: ""}",
             fontSize = 14.sp,
             color = Spese.TextSecondary
         )
