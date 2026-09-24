@@ -14,6 +14,7 @@
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white">
   <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white">
   <img alt="Notion API" src="https://img.shields.io/badge/Notion%20API-2026--03--11-000000?logo=notion&logoColor=white">
+  <img alt="Free and open source" src="https://img.shields.io/badge/Free%20%26%20Open%20Source-%E2%9C%93-brightgreen">
 </p>
 
 <p align="center">
@@ -32,6 +33,14 @@ never get recorded.
 **Notion Expense cuts that down to a few taps.** Type the amount, confirm the
 details, done. The app writes to Notion in the background, and it keeps working
 when you're offline.
+
+> [!NOTE]
+> 💚 **Totally free and open source.** No ads, no subscriptions, no accounts.
+> This is the tool I use every day to save my expenses from my **Samsung** phone.
+>
+> The app was inspired by [**SyncSpend**](https://apps.apple.com/us/app/syncspend/id6759112033)
+> for iOS. Notion Expense brings the same idea to Android as an independent
+> project, not affiliated with SyncSpend.
 
 ## ✨ Features
 
@@ -257,6 +266,17 @@ This installs an optimised, non-debuggable build that starts faster. It's signed
 with the debug key, so it's for installing on your own phone, not for publishing.
 During development you can use `./gradlew :app:installDebug` instead.
 
+**Using Android Studio?** Choose the **release** build, not debug:
+
+1. Open **View → Tool Windows → Build Variants**.
+2. For the `:app` module, change **Active Build Variant** from `debug` to **`release`**.
+3. Press **Run ▶** with your phone connected.
+
+> [!IMPORTANT]
+> Use **release** for the app you keep on your phone. The **debug** build is
+> noticeably less smooth: it's built for debugging, and Android doesn't apply the
+> startup optimisations that come with this project.
+
 > [!TIP]
 > If Gradle can't find a JDK, point it to the one bundled with Android Studio:
 > ```bash
@@ -352,6 +372,14 @@ app/src/main/java/it/speses22/app/
 > The package `it.speses22.app` is kept on purpose: changing it would make
 > Android treat this as a different app and lose cached data and queued
 > expenses.
+
+## 💬 Feedback
+
+Have an **Android** phone? Try it and **tell me how it goes**. Bugs, ideas and
+first impressions are all welcome: just
+[open an issue](https://github.com/ArmyUser/NotionExpense/issues).
+
+If you find it useful, please ⭐ **star the repository**. It really helps!
 
 ## 📄 License
 
